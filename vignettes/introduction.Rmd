@@ -1,0 +1,113 @@
+---
+title: "introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, results='hide'}
+library(tidyverse)
+library(lubridate)
+library(treeImpulses)
+```
+
+# Introduction to the treeImpulses package
+
+There are two primary purposes of the treeImpulses package, 1) estimate tree-based impulse responses, and 2) plot tree-based impulse responses. Accordingly, this introduction will demonstrate 1) how to estimate tree-based impulse responses, and 2) how to plot tree-based impulse responses. 
+
+### Prepare data 
+
+First, prepare the data necessary to run the experiment. Here we will replicate a standard monetary VAR and will pull the required variables from FRED via the quantmod package.
+
+```{r, results='hide'}
+
+# real output gap and inflation
+quantmod::getSymbols.FRED(c('GDPC1','GDPPOT','GDPDEF'), env = globalenv())
+Y = 
+  purrr::reduce(
+    list(
+      data.frame(GDPC1, date = zoo::index(GDPC1)),
+      data.frame(GDPPOT, date = zoo::index(GDPPOT)),
+      data.frame(GDPDEF, date = zoo::index(GDPDEF))
+    ),
+    dplyr::inner_join, by = 'date'
+  ) %>% 
+  dplyr::mutate(y = 100*((GDPC1-GDPPOT)/GDPPOT),
+         p = 400*(GDPDEF - lag(GDPDEF))/lag(GDPDEF)) %>%
+  dplyr::select(date, y, p)
+
+# federal funds rate
+quantmod::getSymbols.FRED(c('FEDFUNDS'), env = globalenv())
+I = data.frame(FEDFUNDS, date = zoo::index(FEDFUNDS)) %>%
+  dplyr::group_by(y = lubridate::year(date), q = lubridate::quarter(date)) %>%
+  dplyr::summarize(date = min(date),
+            ff = mean(FEDFUNDS, na.rm = T)) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(date, ff) %>%
+  data.frame()
+  
+# merge data
+Data = 
+  dplyr::inner_join(Y, I, by = 'date') %>%
+  dplyr::filter(date < as.Date('2020-01-01')) %>%
+  dplyr::arrange(date) %>%
+  dplyr::select(-date) %>%
+  na.omit()
+
+# demean the data
+deMean = function(X){return(X-mean(X))}
+Data = apply(Data, MARGIN = 2, FUN = deMean)
+
+```
+
+### Estimate tree-based impulse responses
+
+Next, armed with a measure of inflation, the output gap, and federal funds rate, one may estimate impulse responses.
+
+```{r, results='hide'}
+
+# estimate impulse response  (using Trees)
+impulseResponses = 
+  localProjectionIRF_VAR(
+    data = Data,                 
+    shocks = c('y','p','ff'),                
+    targets = c('y','p','ff'),
+    horizons = 12,             # horizons to forecast out to
+    lags = 4,                  # lags to include in regressions 
+    lags_max = 12,             # maximum number of lags
+    standardize = FALSE,       # standardize inputs (mean = 0 variance = 1)
+    confidence = 0.1,          # alpha used for two-sided confidence intervals 
+    states = NULL,             # column name used to define states
+    NW = FALSE,                # Newey-West correction on variance-covariance matrix
+    NW_lags = NULL,            # number of lags to use in Newey-West correction
+    NW_prewhite = NULL,        # prewhite option for Newey-West correction (see sandwich::NeweyWest function)
+    engine = 'AW',             # string declaring how to estimate responses 
+    treeBag = 5,               # number of tree-based models to bag over
+    cores = -1,                # number of cores available to use, set -1 to indicate use all available resources
+    seed = 1116,               # random seed to be used (must be integer)
+    IV = TRUE,                 # perform a two-stage instrumental variable regression (currently only supported for trees)
+    Cholesky = FALSE           # append the initial structural shock from a cholesky decomposition [primarily for replication purposes]
+  )
+
+```
+
+### Plot impulse responses
+
+Lastly, one may plot the resulting impulse responses. 
+
+```{r, fig.dim = c(6,6), fig.align='center'}
+plot(impulseResponses)
+```
+
+### Conclusion
+
+While the treeImpulses package focuses solely on two tasks, there is a great amount of flexibility in which one may accomplish that task, estimating tree-based impulse responses - the user may choose what type of random forest to use, choose how to identify the optimal number of lags, and generate instrumental variable based shocks. Please see function documentation for further details. 
