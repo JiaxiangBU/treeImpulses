@@ -8,8 +8,8 @@
 <!-- badges: end -->
 
 
-The treeImpulses package produces and plots random forest based impulse response functions. 
-Users may choose from two random forest variants, implement instrumental variable, allow state-dependence, and choose lags based on information or forecasting accuracy. 
+The treeImpulses package produces and plots tree-based impulse response functions. 
+Users may choose from two random forest variants, implement instrumental variable, allow state-dependence, and choose lags based on information criteria or forecasting accuracy. 
 
 ---
 
