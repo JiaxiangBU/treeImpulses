@@ -57,7 +57,6 @@ This short example shows how to calculate impulse responses based on a system of
     # plot the impulse responses
     plot(impulseResponses)
 
-## Implementation notes
-
-1. It is advised to run the routine in paralle, controled by the `cores` command, while -1 will use all available cores.
-2. `NW` commands are only available with the to OLS estimation engine.
+## Runtime notes
+1. It is advised to run the routine in parallel, controled by the `cores` command
+2. `NW` commands are only available with the to OLS estimation engine
