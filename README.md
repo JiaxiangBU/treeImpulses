@@ -27,7 +27,7 @@ This short example shows how to calculate impulse responses based on a system of
     # generate data
     n = 300
     x = rnorm(n)
-    y = rpois(n)
+    y = rpois(n, lambda = 1)
     z = 0.8*x + 0.1*y + 0.1*rnorm(n)
     Data = data.frame(x, y, z)
 
