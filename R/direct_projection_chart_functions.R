@@ -3,10 +3,6 @@
 # Date: 2/5/2020
 # Note(s): Houses functions to chart different types of Jorda (2005) style direct projections
 
-# imports
-# 1. dplyr
-# 2. purrr
-
 #------------------------------------------------------------------
 # function to plot hooks at top of charts
 #------------------------------------------------------------------

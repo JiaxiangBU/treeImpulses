@@ -3,53 +3,6 @@
 # Date: 2/5/2020
 # Note(s): Houses functions to calculate different types of Jorda (2005) style direct projections
 
-# required libraries
-# require(tidyverse)         # general cleaning
-# require(sandwich)          # newey-west standard errors
-# require(lmtest)            # lm test for IRF
-# require(grf)               # random forest estimation
-
-
-# set python enviroment
-# library(reticulate)
-# Sys.setenv(RETICULATE_PYTHON="/apps/anaconda3/bin/python3")
-# np = import('numpy')
-# econml = import('econml')
-# sklearn = import('sklearn')
-# econML = import('econml.ortho_forest')
-
-
-# Features to include
-# draft 0
-# [X] 1. flexible confidence interval size
-# [X] 2. standardize for user
-# [X] 3. ability to choose NW correction (including lags and pre-white options)
-# draft 1
-# [~] 4. ability to perform instrumental variable regressions for shocks
-# [X] 5. ability to declare number of corse (default is to detect number available)
-# [X] 6. choose lags based on information criterion
-# [X] 7. ability to choose either OSW or AW tree-baesd models
-# draft 2
-# [X] 8. export information about shocks, models, targets, ect.
-# Optional
-# [ ] 7. ability to add contemporaneious data
-
-# data to include
-# 1. Monetary policy var data
-# 2. fiscal policy var data
-
-# imports
-# 1. dplyr
-# 2. purrr
-# 3. tidyselect
-# 4. lmtest
-# 5. sandwich
-# 6. lpirf
-# 7. reticulate
-# 8. numpy (python)
-# 9. sklearn (python)
-# 10. econml (python)
-
 #-------------------------------------------------------------#
 # Function to produce IRF                                  ####
 #-------------------------------------------------------------#
@@ -82,7 +35,8 @@
 #' \code{engine} (the method used to estimate impulses),
 #' \code{target} (the variable that was responding to a shock),
 #' \code{shock} (the variable that was shocked), and
-#' \code{lags} (the number of lags used in estimation).
+#' \code{lags} (the number of lags used in estimation). 
+#' Standard errors are not reported for OSW trees-based impulse responses, only upper and lower confidence intervals.
 #'
 #' @export
 

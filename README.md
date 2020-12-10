@@ -14,7 +14,7 @@ Users may choose from two random forest variants, implement instrumental variabl
 ---
 
 ## Installation
-The package may be downlaoded or cloned from github:  
+The package may be downloaded or cloned from github:  
 
     devtools::install_github('tylerJPike/treeImpulses')
 
@@ -58,5 +58,5 @@ This short example shows how to calculate impulse responses based on a system of
     plot(impulseResponses)
 
 ## Runtime notes
-1. It is advised to run the routine in parallel, controled by the `cores` command
-2. `NW` commands are only available with the to OLS estimation engine
+1. It is advised to run the routine in parallel, controlled by the `cores` command
+2. `NW` commands are only available with the to OLS estimation engine; `IV` and `Cholesky` are only available with tree-based estimation engines. 
