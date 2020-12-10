@@ -24,6 +24,7 @@ library(treeImpulses)
 
 There are two primary purposes of the treeImpulses package, 1) estimate tree-based impulse responses, and 2) plot tree-based impulse responses. Accordingly, this introduction will demonstrate 1) how to estimate tree-based impulse responses, and 2) how to plot tree-based impulse responses. 
 
+## Standard impulse responses
 ### Prepare data 
 
 First, prepare the data necessary to run the experiment. Here we will replicate a standard monetary VAR and will pull the required variables from FRED via the quantmod package.
@@ -64,8 +65,8 @@ Data =
   na.omit()
 
 # demean the data
-deMean = function(X){return(X-mean(X))}
-Data = apply(Data, MARGIN = 2, FUN = deMean)
+Data = Data %>% 
+  dplyr::mutate_all(function(X){return(X - mean(X, na.rm = TRUE))})
 
 ```
 
@@ -107,6 +108,54 @@ Lastly, one may plot the resulting impulse responses.
 ```{r, fig.dim = c(6,6), fig.align='center'}
 plot(impulseResponses)
 ```
+
+
+## State-dependent impulse responses
+
+Alternatively, one may want to impose explicit state-dependence in their impulse responses. To do this, include a factor or integer column in the design matrix, and declare this column as the states argument. 
+
+```{r, results='hide'}
+
+# create state variable
+Data = Data %>% 
+  dplyr::mutate(expansion = as.factor(dplyr::if_else(y >= 0, 'exp', 'rec')))
+
+# estimate impulse response  
+impulseResponses = 
+  localProjectionIRF_VAR(
+    data = Data,                 
+    shocks = c('y','p','ff'),                
+    targets = c('y','p','ff'),
+    horizons = 12,             # horizons to forecast out to
+    lags = 4,                  # lags to include in regressions 
+    lags_max = 12,             # maximum number of lags
+    standardize = FALSE,       # standardize inputs (mean = 0 variance = 1)
+    confidence = 0.1,          # alpha used for two-sided confidence intervals 
+    states = 'expansion',             # column name used to define states
+    NW = FALSE,                # Newey-West correction on variance-covariance matrix
+    NW_lags = NULL,            # number of lags to use in Newey-West correction
+    NW_prewhite = NULL,        # prewhite option for Newey-West correction (see sandwich::NeweyWest function)
+    engine = 'AW',             # string declaring how to estimate responses 
+    treeBag = 5,               # number of tree-based models to bag over
+    cores = -1,                # number of cores available to use, set -1 to indicate use all available resources
+    seed = 1116,               # random seed to be used (must be integer)
+    IV = TRUE,                 # perform a two-stage instrumental variable regression (currently only supported for trees)
+    Cholesky = FALSE           # append the initial structural shock from a cholesky decomposition [primarily for replication purposes]
+  )
+
+```
+
+And plot impulse responses by state.
+
+```{r, fig.dim = c(6,6), fig.align='center'}
+plot(impulseResponses, state = 'exp')
+```
+
+
+```{r, fig.dim = c(6,6), fig.align='center'}
+plot(impulseResponses, state = 'rec')
+```
+
 
 ### Conclusion
 
