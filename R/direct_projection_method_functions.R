@@ -311,6 +311,7 @@ localProjectionIRF <-
             for(i in 1:horizons){
 
                 # set experiment data
+                # browser()
                 Treatment <- X %>% dplyr::select(shock) %>% as.vector()
                 High_dim_controls <- X %>% dplyr::select(-shock, -matches('lead_\\d+_target')) %>% as.matrix()
                 Exogenous <- X %>% dplyr::select(-shock, -matches('lead_\\d+_target')) %>% as.matrix()
@@ -356,6 +357,7 @@ localProjectionIRF <-
                   }else if(engine == 'AW'){
 
                     # define model and fit model
+                    # browser()
                     if(IV == FALSE){
                       treeModel <-
                         grf::regression_forest(
@@ -363,6 +365,7 @@ localProjectionIRF <-
                           Y = Y %>% as.matrix()
                           )
                     }else if(IV == TRUE){
+                      browser()
                       treeModel <-
                         grf::causal_forest(
                           X = Exogenous,
@@ -378,6 +381,7 @@ localProjectionIRF <-
                               newdata = as.matrix(Simulation))
 
                     # store results intervals
+                    browser()
                     treatment_effects[j] <- predictTree$predictions
                     treatment_se[j] <- predictTree$variance.estimates
                     treatment_interval[j, 1] <- predictTree$predictions - predictTree$variance.estimates
