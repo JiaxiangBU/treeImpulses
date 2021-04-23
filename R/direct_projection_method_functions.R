@@ -133,8 +133,11 @@ localProjectionIRF <-
     }
 
     # exogenous variable names
-    data.variables <- colnames(select(data, -contains('states')))
-
+    # data.variables <- colnames(select(data, -contains('states')))
+    data.variables <- 
+      data %>% names %>% 
+      str_subset("states", negate = TRUE)
+    # browser()
     # second, standardize inputs, if desired
     if(standardize == TRUE){
     data <- data %>%
